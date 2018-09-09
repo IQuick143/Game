@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using NetworkMessageTypes;
 
 /*
  * Class responsible for handling the gamestate and server communication
@@ -9,13 +10,14 @@ using UnityEngine.Networking;
 public class GameServer : MonoBehaviour {
 
 	public static readonly int port = 1337;
+	private bool passwordProtected = false;
+	private string Password = null;
+	private bool hasHost = false;
 
-	// Use this for initialization
 	void Awake() {
 		Initialize();
 	}
 	
-	// Update is called once per frame
 	void Update() {
 		
 	}
@@ -30,6 +32,8 @@ public class GameServer : MonoBehaviour {
 			return;
 		}
 
+		hasHost = false;
+
 		NetworkServer.Listen(port);
 
 		RegisterHandlers();
@@ -42,6 +46,38 @@ public class GameServer : MonoBehaviour {
 	}
 
 	private void RegisterHandlers() {
+		//Connection
+		NetworkServer.RegisterHandler((short) ClientToServer.ID.RegisterClient, OnRegisterClient);
+		//Chat
+		//Debug
+		NetworkServer.RegisterHandler((short) ClientToServer.ID.TestMessage, OnTestMessage);
+	}
 
+	//Handlers
+	
+	private void OnTestMessage(NetworkMessage nmsg) {
+		Debug.Log(nmsg.ReadMessage<NetworkMessageTypes.ClientToServer.TestMessage>().data);
+	}
+
+	
+	private void OnRegisterClient(NetworkMessage nmsg) {
+		var msg = nmsg.ReadMessage<ClientToServer.RegisterClientMessage>();
+
+		bool accept = true;
+		if (passwordProtected) {
+			if (msg.Password != Password) {
+				accept = false;
+			}
+		}
+
+		var message = new ServerToClient.ClientRegistrationAcceptanceMessage();
+		message.Accepted = accept;
+		if (accept && !hasHost) {
+			message.AcceptedAsHost = true;
+
+		}
+		NetworkServer.SendToClient(nmsg.conn.connectionId, (short) ServerToClient.ID.ClientRegistrationAcceptance, message);
+
+		//Do something to register the client
 	}
 }
