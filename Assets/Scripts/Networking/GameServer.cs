@@ -74,7 +74,6 @@ public class GameServer : MonoBehaviour {
 		message.Accepted = accept;
 		if (accept && !hasHost) {
 			message.AcceptedAsHost = true;
-
 		}
 		NetworkServer.SendToClient(nmsg.conn.connectionId, (short) ServerToClient.ID.ClientRegistrationAcceptance, message);
 

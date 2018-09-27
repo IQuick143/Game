@@ -6,6 +6,24 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Menu/MainMenu.unity
+    guid: 56e7b8c2ed0484f49bdf64533a812804
+  - enabled: 1
+    path: Assets/Scenes/Menu/PlayGameMenu.unity
+    guid: 6dfa54dc5e741424a9e01c10005c2158
+  - enabled: 1
+    path: Assets/Scenes/Netowrking/ClientJoin.unity
+    guid: 1acdd202066ee5947b0cecb1872d3f2c
+  - enabled: 1
+    path: Assets/Scenes/Netowrking/ClientLobby.unity
+    guid: 9f37bca5239abfd4e90b2c09f261fc7b
+  - enabled: 1
+    path: Assets/Scenes/Netowrking/HostHost.unity
+    guid: 78483da861de3084b907c059f9c6897a
+  - enabled: 1
+    path: Assets/Scenes/Netowrking/HostLobby.unity
+    guid: 36c69197e093f334f8c2381a2b53dcc9
+  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   m_configObjects: {}

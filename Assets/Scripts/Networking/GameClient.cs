@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -17,6 +18,10 @@ public class GameClient : MonoBehaviour {
 		}
 	}
 	public bool active = false;
+	public bool isHost = false;
+
+	private new string name = "";
+	private string hostAddress;
 
 	// Use this for initialization
 	void Start() {
@@ -32,6 +37,11 @@ public class GameClient : MonoBehaviour {
 		}
 	}
 
+	public void SetData(string name, string address) {
+		this.name = name;
+		this.hostAddress = address;
+	}
+
 	public void InitializeClient() {
 		if (client != null) {
 			Debug.LogError("Already connected");
@@ -39,9 +49,23 @@ public class GameClient : MonoBehaviour {
 		}
 
 		client = new NetworkClient();
-		client.Connect("localhost", GameServer.port);
-		Debug.Log(client.connection != null);
+
 		RegisterHandlers();
+
+		//Parse address
+		Uri url;
+		int port = GameServer.port;
+		if (Uri.TryCreate("http://" + hostAddress, UriKind.Absolute, out url)) {
+			if (url.Port != 80) port = url.Port; 
+			Debug.Log("IP: "+url.Host+" Port: "+port);
+		} else {
+			Debug.LogError("Error parsing IP Address");
+			client.Shutdown();
+			client = null;
+			return;
+		}
+
+		client.Connect(url.Host, port);
 
 		DontDestroyOnLoad(this.gameObject);
 	}
@@ -63,12 +87,13 @@ public class GameClient : MonoBehaviour {
 		Debug.Log("Connected");
 		Debug.Log("Sending Registration");
 		var msg = new ClientToServer.RegisterClientMessage();
-		msg.Name = "BananaMan";
+		msg.Name = this.name;
 		client.Send((short) ClientToServer.ID.RegisterClient, msg);
 	}
 
 	private void OnDisconnected(NetworkMessage nmsg) {
 		Debug.Log("Disconnected");
+		ResetClient();
 	}
 
 	private void OnError(NetworkMessage nmsg) {
@@ -80,9 +105,16 @@ public class GameClient : MonoBehaviour {
 		if (msg.Accepted) {
 			Debug.Log("Accepted");
 			this.active = true;
+			this.isHost = msg.AcceptedAsHost;
 		} else {
 			Debug.LogWarning("Not Accepted");
-
+			this.active = false;
+			this.isHost = false;
+			ResetClient();
 		}
+	}
+
+	private void ResetClient() {
+		//TODO: Idk something I guess
 	}
 }
